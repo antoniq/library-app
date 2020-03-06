@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath("gradle.plugin.org.springframework.cloud:spring-cloud-contract-gradle-plugin:2.2.1.RELEASE")
+        classpath("gradle.plugin.org.springframework.cloud:spring-cloud-contract-gradle-plugin:${springCloudContractVersion}")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
         classpath("se.transmode.gradle:gradle-docker:${dockerPluginVersion}")
@@ -49,6 +49,13 @@ repositories {
     mavenCentral()
 }
 
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-contract-dependencies:${springCloudContractVersion}"
+    }
+}
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -67,7 +74,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.springframework.cloud:spring-cloud-starter-contract-verifier:2.2.1.RELEASE")
+    testImplementation("org.springframework.cloud:spring-cloud-starter-contract-verifier")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("io.rest-assured:rest-assured")
@@ -109,6 +116,18 @@ task aggregateTestReports(type: TestReport) {
     reportOn unitTest, integrationTest, acceptanceTest, contractTest
 }
 
+/**
+ * Custom configuration of spring cloud contract gradle plugin.
+ */
+contracts {
+    testFramework = 'JUNIT5' //specifies JUNIT5 as test framework
+    basePackageForTests = 'library.service.messaging.contracts.MessageDispatcherBase'
+   // packageWithBaseClasses = 'library.service.messaging'
+   // baseClassMappings {
+     //   baseClassMapping(".*contracts.*", "library.service.messaging.contracts.MessageDispatcherBase")
+    //}
+}
+
 asciidoctor {
     dependsOn acceptanceTest
     setOptions([
@@ -146,3 +165,13 @@ task buildDocker(type: Docker, dependsOn: build) {
 
 tasks.check.dependsOn.remove(test)
 tasks.check.dependsOn contractTest
+
+
+// IMPORTANT!
+sourceSets {
+    test.java.srcDirs += new File(project.buildDir, "generated-test-source").toString()
+}
+
+//remove::start[]
+compileTestGroovy.enabled = false
+//remove::end[]
