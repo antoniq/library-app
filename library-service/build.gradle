@@ -5,9 +5,13 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/" //used for legacy plugin applications
+        }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("gradle.plugin.org.springframework.cloud:spring-cloud-contract-gradle-plugin:2.2.1.RELEASE")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
         classpath("se.transmode.gradle:gradle-docker:${dockerPluginVersion}")
@@ -20,6 +24,7 @@ apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: "org.springframework.cloud.contract"
 apply plugin: "org.asciidoctor.convert"
 
 sourceCompatibility = 1.8
@@ -62,6 +67,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.cloud:spring-cloud-starter-contract-verifier:2.2.1.RELEASE")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("io.rest-assured:rest-assured")
